@@ -38,7 +38,7 @@ exports.getComercioById = async (req, res) => {
 };
 
 exports.createComercio = async (req, res) => {
-    const { titulo, descripcion, direccion, latitud, longitud, telefonos, servicios, foto_portada, imagenes, estado, horarios } = req.body;
+    const { titulo, descripcion,  calleavenida, zona, direccion, referencia, latitud, longitud, telefonos, servicios, foto_portada, imagenes, estado, horarios } = req.body;
     let connection;
 
     try {
@@ -48,9 +48,9 @@ exports.createComercio = async (req, res) => {
 
         // Insertar comercio
         const [comercio] = await connection.query(
-            `INSERT INTO comercios (nombre, descripcion, direccion, latitud, longitud, foto_portada, estado) 
-             VALUES (?, ?, ?, ?, ?, ?, ?)`,
-            [titulo, descripcion, direccion, latitud, longitud, foto_portada, estado]
+            `INSERT INTO comercios (nombre, descripcion, calleavenida, zona, direccion, referencia, latitud, longitud, foto_portada, estado) 
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [titulo, descripcion,calleavenida, zona, direccion,referencia, latitud, longitud, foto_portada, estado]
         );
 
         const comercioId = comercio.insertId;

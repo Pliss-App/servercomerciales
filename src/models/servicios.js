@@ -2,17 +2,9 @@ const pool = require('../config/db');
 
 const Comercio = {
 
-    async getAllActive() {
-        try {
-            const [rows] = await pool.execute("SELECT count(1) as total FROM comercios WHERE estado = 'activo'");
-            return rows;
-        } catch (error) {
-            throw new Error(error.message);
-        }
-    },
 
     async getAll() {
-        const [rows] = await pool.query("SELECT * FROM comercios");
+        const [rows] = await pool.query("SELECT * FROM servicios");
         return rows;
     },
 

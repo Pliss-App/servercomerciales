@@ -1,5 +1,5 @@
 const Comercio = require('../models/comercio');
-
+const pool = require('../config/db');
 
 exports.getAllComerciosActive = async (req, res) => {
     try {
@@ -41,7 +41,7 @@ exports.createComercio = async (req, res) => {
     const { titulo, descripcion, direccion, latitud, longitud,   telefonos, servicios ,foto_portada, imagenes, estado, horarios} = req.body;
     console.log("Datos ", titulo, descripcion, direccion, latitud, longitud,   telefonos, servicios ,foto_portada, imagenes, estado, horarios )
     try {
-        const [comercio] = await db.query(
+        const [comercio] = await pool.query(
             `INSERT INTO comercios (nombre, descripcion, direccion, latitud, longitud, foto_portada, estado) 
              VALUES (?, ?, ?, ?, ?, ?, ?)`,
             [titulo, descripcion, direccion, latitud, longitud, foto_portada, estado]
@@ -50,34 +50,34 @@ exports.createComercio = async (req, res) => {
         const comercioId = comercio.insertId;
 
         if(comercioId){
-            await db.query(`INSERT INTO comercio_area (comercio_id, area_id) VALUES (?, ?)`, [comercioId, 1]);
+            await pool.query(`INSERT INTO comercio_area (comercio_id, area_id) VALUES (?, ?)`, [comercioId, 1]);
         }
 
         // Insertar teléfonos
         if (telefonos && telefonos.length > 0) {
             for (let numero of telefonos) {
-                await db.query(`INSERT INTO telefonos (comercio_id, numero) VALUES (?, ?)`, [comercioId, numero]);
+                await pool.query(`INSERT INTO telefonos (comercio_id, numero) VALUES (?, ?)`, [comercioId, numero]);
             }
         }
 
                 // Insertar Servicios
                 if (horarios && horarios.length > 0) {
                     for (let horario of horarios) {
-                        await db.query(`INSERT INTO horarios  (comercio_id, dia,apertura, cierre) VALUES (?, ?,?,?)`, [comercioId, horario.dia, horario.apertura, horario.cierre]);
+                        await pool.query(`INSERT INTO horarios  (comercio_id, dia,apertura, cierre) VALUES (?, ?,?,?)`, [comercioId, horario.dia, horario.apertura, horario.cierre]);
                     }
                 }
 
         // Insertar servicios
         if (servicios && servicios.length > 0) {
             for (let servicioId of servicios) {
-                await db.query(`INSERT INTO comercio_servicios (comercio_id, servicio_id) VALUES (?, ?)`, [comercioId, servicioId]);
+                await pool.query(`INSERT INTO comercio_servicios (comercio_id, servicio_id) VALUES (?, ?)`, [comercioId, servicioId]);
             }
         }
 
         // Insertar galeria
         if (imagenes && imagenes.length > 0) {
             for (let imagen of imagenes) {
-                await db.query(`INSERT INTO galeria_fotos (comercio_id,  imagen_base64, url_imagen) VALUES (?, ?, ?)`, [comercioId, imagen, 'NULL']);
+                await pool.query(`INSERT INTO galeria_fotos (comercio_id,  imagen_base64, url_imagen) VALUES (?, ?, ?)`, [comercioId, imagen, 'NULL']);
             }
         }
 

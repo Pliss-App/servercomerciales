@@ -38,10 +38,16 @@ exports.getComercioById = async (req, res) => {
 };
 
 exports.createComercio = async (req, res) => {
-    const { titulo, descripcion, direccion, latitud, longitud,   telefonos, servicios ,foto_portada, imagenes, estado, horarios} = req.body;
-    console.log("Datos ", titulo, descripcion, direccion, latitud, longitud,   telefonos, servicios ,foto_portada, imagenes, estado, horarios )
+    const { titulo, descripcion, direccion, latitud, longitud, telefonos, servicios, foto_portada, imagenes, estado, horarios } = req.body;
+    let connection;
+
     try {
-        const [comercio] = await pool.query(
+        // Obtener conexión del pool
+        connection = await pool.getConnection();
+        await connection.beginTransaction(); // Iniciar transacción
+
+        // Insertar comercio
+        const [comercio] = await connection.query(
             `INSERT INTO comercios (nombre, descripcion, direccion, latitud, longitud, foto_portada, estado) 
              VALUES (?, ?, ?, ?, ?, ?, ?)`,
             [titulo, descripcion, direccion, latitud, longitud, foto_portada, estado]
@@ -49,43 +55,50 @@ exports.createComercio = async (req, res) => {
 
         const comercioId = comercio.insertId;
 
-        if(comercioId){
-            await pool.query(`INSERT INTO comercio_area (comercio_id, area_id) VALUES (?, ?)`, [comercioId, 1]);
-        }
+        // Insertar en comercio_area
+        await connection.query(`INSERT INTO comercio_area (comercio_id, area_id) VALUES (?, ?)`, [comercioId, 1]);
 
         // Insertar teléfonos
-        if (telefonos && telefonos.length > 0) {
+        if (telefonos?.length) {
             for (let numero of telefonos) {
-                await pool.query(`INSERT INTO telefonos (comercio_id, numero) VALUES (?, ?)`, [comercioId, numero]);
+                await connection.query(`INSERT INTO telefonos (comercio_id, numero) VALUES (?, ?)`, [comercioId, numero]);
             }
         }
 
-                // Insertar Servicios
-                if (horarios && horarios.length > 0) {
-                    for (let horario of horarios) {
-                        await pool.query(`INSERT INTO horarios  (comercio_id, dia,apertura, cierre) VALUES (?, ?,?,?)`, [comercioId, horario.dia, horario.apertura, horario.cierre]);
-                    }
-                }
+        // Insertar horarios
+        if (horarios?.length) {
+            for (let horario of horarios) {
+                await connection.query(`INSERT INTO horarios (comercio_id, dia, apertura, cierre) VALUES (?, ?, ?, ?)`, [comercioId, horario.dia, horario.apertura, horario.cierre]);
+            }
+        }
 
         // Insertar servicios
-        if (servicios && servicios.length > 0) {
+        if (servicios?.length) {
             for (let servicioId of servicios) {
-                await pool.query(`INSERT INTO comercio_servicios (comercio_id, servicio_id) VALUES (?, ?)`, [comercioId, servicioId]);
+                await connection.query(`INSERT INTO comercio_servicios (comercio_id, servicio_id) VALUES (?, ?)`, [comercioId, servicioId]);
             }
         }
 
-        // Insertar galeria
-        if (imagenes && imagenes.length > 0) {
+        // Insertar imágenes
+        if (imagenes?.length) {
             for (let imagen of imagenes) {
-                await pool.query(`INSERT INTO galeria_fotos (comercio_id,  imagen_base64, url_imagen) VALUES (?, ?, ?)`, [comercioId, imagen, 'NULL']);
+                await connection.query(`INSERT INTO galeria_fotos (comercio_id, imagen_base64, url_imagen) VALUES (?, ?, ?)`, [comercioId, imagen, 'NULL']);
             }
         }
 
+        await connection.commit(); // Confirmar transacción
         res.status(200).json({ success: true, message: "Comercio agregado exitosamente", comercioId });
+
     } catch (error) {
+        if (connection) await connection.rollback(); // Deshacer cambios si hay error
+
         res.status(500).json({ success: false, message: "Error al agregar comercio", error: error.message });
+
+    } finally {
+        if (connection) connection.release(); // Liberar conexión
     }
 };
+
 
 exports.updateComercio = async (req, res) => {
     try {

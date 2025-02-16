@@ -1,0 +1,8 @@
+# Ignorar archivos de entorno
+.env
+.env.local
+.env.production
+.env.*  # Ignora cualquier variante de .env
+
+# Ignorar carpeta ngmodules
+node_modules/

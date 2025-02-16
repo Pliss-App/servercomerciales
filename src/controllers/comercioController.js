@@ -38,13 +38,13 @@ exports.getComercioById = async (req, res) => {
 };
 
 exports.createComercio = async (req, res) => {
-    const { nombre, descripcion, direccion, latitud, longitud,   telefonos, servicios ,foto_portada, imagenes, estado, horarios} = req.body;
-    console.log("Datos ", nombre, descripcion, direccion, latitud, longitud,   telefonos, servicios ,foto_portada, imagenes, estado, horarios )
+    const { titulo, descripcion, direccion, latitud, longitud,   telefonos, servicios ,foto_portada, imagenes, estado, horarios} = req.body;
+    console.log("Datos ", titulo, descripcion, direccion, latitud, longitud,   telefonos, servicios ,foto_portada, imagenes, estado, horarios )
     try {
         const [comercio] = await db.query(
             `INSERT INTO comercios (nombre, descripcion, direccion, latitud, longitud, foto_portada, estado) 
              VALUES (?, ?, ?, ?, ?, ?, ?)`,
-            [nombre, descripcion, direccion, latitud, longitud, foto_portada, estado]
+            [titulo, descripcion, direccion, latitud, longitud, foto_portada, estado]
         );
 
         const comercioId = comercio.insertId;

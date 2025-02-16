@@ -37,8 +37,26 @@ exports.getComercioById = async (req, res) => {
     }
 };
 
+exports.getComercioByIdService = async (req, res) => {
+    try {
+
+        const comercios = await Comercio.getByIdFilterService(req.params.id); // Esta función ya es `async`
+        res.status(200).json({
+            success: true,
+            message: "Lista de comercios activos obtenida correctamente",
+            result: comercios
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Error al obtener comercios activos",
+            error: error.message
+        });
+    }
+};
+
 exports.createComercio = async (req, res) => {
-    const { titulo, descripcion,  calleavenida, zona, direccion, referencia, latitud, longitud, telefonos, servicios, foto_portada, imagenes, estado, horarios } = req.body;
+    const { titulo, descripcion, calleavenida, zona, direccion, referencia, latitud, longitud, telefonos, servicios, foto_portada, imagenes, estado, horarios } = req.body;
     let connection;
 
     try {
@@ -50,7 +68,7 @@ exports.createComercio = async (req, res) => {
         const [comercio] = await connection.query(
             `INSERT INTO comercios (nombre, descripcion, calleavenida, zona, direccion, referencia, latitud, longitud, foto_portada, estado) 
              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-            [titulo, descripcion,calleavenida, zona, direccion,referencia, latitud, longitud, foto_portada, estado]
+            [titulo, descripcion, calleavenida, zona, direccion, referencia, latitud, longitud, foto_portada, estado]
         );
 
         const comercioId = comercio.insertId;

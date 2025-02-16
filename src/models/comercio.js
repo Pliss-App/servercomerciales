@@ -16,7 +16,19 @@ const Comercio = {
         return rows;
     },
 
-    
+    async getByIdFilterService(id) {
+        try {
+            const [rows] = await pool.query(`SELECT DISTINCT c.*
+FROM comercios c
+LEFT JOIN comercio_servicios cs ON c.id = cs.comercio_id
+WHERE c.estado = 'activo'
+AND ( COALESCE(${id}, NULL) IS NULL OR cs.servicio_id = ${id} );
+`);
+            return rows;
+        } catch (error) {
+            throw new Error(error.message);
+        }
+    },
 
     async getById(id) {
         const [rows] = await pool.query("SELECT * FROM comercios WHERE id = ?", [id]);
@@ -25,15 +37,15 @@ const Comercio = {
 
     async create(data) {
         const { nombre, descripcion, telefono, latitud, longitud, direccion, portada, estado } = data;
-        const [result] = await pool.query("INSERT INTO comercios (nombre, descripcion, telefono, latitud, longitud, direccion, portada, estado) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", 
-        [nombre, descripcion, telefono, latitud, longitud, direccion, portada, estado]);
+        const [result] = await pool.query("INSERT INTO comercios (nombre, descripcion, telefono, latitud, longitud, direccion, portada, estado) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            [nombre, descripcion, telefono, latitud, longitud, direccion, portada, estado]);
         return result.insertId;
     },
 
     async update(id, data) {
         const { nombre, descripcion, telefono, latitud, longitud, direccion, portada, estado } = data;
-        await pool.query("UPDATE comercios SET nombre=?, descripcion=?, telefono=?, latitud=?, longitud=?, direccion=?, portada=?, estado=? WHERE id=?", 
-        [nombre, descripcion, telefono, latitud, longitud, direccion, portada, estado, id]);
+        await pool.query("UPDATE comercios SET nombre=?, descripcion=?, telefono=?, latitud=?, longitud=?, direccion=?, portada=?, estado=? WHERE id=?",
+            [nombre, descripcion, telefono, latitud, longitud, direccion, portada, estado, id]);
     },
 
     async delete(id) {

@@ -43,11 +43,15 @@ exports.createComercio = async (req, res) => {
     try {
         const [comercio] = await db.query(
             `INSERT INTO comercios (nombre, descripcion, direccion, latitud, longitud, foto_portada, estado) 
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+             VALUES (?, ?, ?, ?, ?, ?, ?)`,
             [nombre, descripcion, direccion, latitud, longitud, foto_portada, estado]
         );
 
         const comercioId = comercio.insertId;
+
+        if(comercioId){
+            await db.query(`INSERT INTO comercio_area (comercio_id, area_id) VALUES (?, ?)`, [comercioId, 1]);
+        }
 
         // Insertar teléfonos
         if (telefonos && telefonos.length > 0) {

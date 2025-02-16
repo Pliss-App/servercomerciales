@@ -5,4 +5,4 @@
 .env.*  # Ignora cualquier variante de .env
 
 # Ignorar carpeta ngmodules
-node_modules/
+node_modules
